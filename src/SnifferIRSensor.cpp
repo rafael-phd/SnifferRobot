@@ -16,24 +16,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "ir_sensor.h"
+#include "SnifferIRSensor.h"
 
-IRSensor IRSensor::front_left(IR_LEFT_a0);
-IRSensor IRSensor::front_right(IR_RIGHT_a0);
+SnifferIRSensor SnifferIRSensor::front_left(SNIFFER_IR_LEFT_a0);
+SnifferIRSensor SnifferIRSensor::front_right(SNIFFER_IR_RIGHT_a0);
 
-void IRSensor::Initialize(Stream *p_debug) {
+void SnifferIRSensor::begin(Stream *p_debug) {
   if (p_debug != NULL) {
-    p_debug->println("IR Sensors Initialized");
+    p_debug->println("IR Sensors begind");
   }
 }
 
 
-IRSensor::IRSensor(int pin) {
+SnifferIRSensor::SnifferIRSensor(int pin) {
   _pin = pin;
 }
 
 
-float IRSensor::getValue() {
+float SnifferIRSensor::read() {
   int analog_value_min = 0;
   int analog_value_max = 1023;
   int analog_value;

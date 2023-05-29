@@ -16,25 +16,25 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
  
-#ifndef SPEED_CONTROLLER_h
-#define SPEED_CONTROLLER_h
+#ifndef SNIFFER_SPEED_CTRL_h
+#define SNIFFER_SPEED_CTRL_h
 
 #include <Arduino.h>
 
-#include "motor_drive.h" /* MOTOR_DRIVE_CONTROL_MIN, MOTOR_DRIVE_CONTROL_MAX */
-#include "sampling_ctrl.h" /* SamplingController */
+#include "SnifferMotorDrive.h" /* SNIFFER_MOTOR_DRIVE_CONTROL_MIN, SNIFFER_MOTOR_DRIVE_CONTROL_MAX */
+#include "SnifferSamplingCtrl.h" /* SnifferSamplingCtrl */
 
-#define SPEED_CONTROL_SAMPLING_TIME_MILLISEC 100u
-#define SPEED_CONTROL_LEFT_KP_DEFAULT    0.0f
-#define SPEED_CONTROL_LEFT_KI_DEFAULT    0.0f
-#define SPEED_CONTROL_LEFT_KD_DEFAULT    0.0f
-#define SPEED_CONTROL_LEFT_TAU_DEFAULT   0.0f
-#define SPEED_CONTROL_RIGHT_KP_DEFAULT   0.0f
-#define SPEED_CONTROL_RIGHT_KI_DEFAULT   0.0f
-#define SPEED_CONTROL_RIGHT_KD_DEFAULT   0.0f
-#define SPEED_CONTROL_RIGHT_TAU_DEFAULT  0.0f
+#define SNIFFER_SPEED_CTRL_SAMPLING_TIME_MILLISEC 100u
+#define SNIFFER_SPEED_CTRL_LEFT_KP_DEFAULT    0.0f
+#define SNIFFER_SPEED_CTRL_LEFT_KI_DEFAULT    0.0f
+#define SNIFFER_SPEED_CTRL_LEFT_KD_DEFAULT    0.0f
+#define SNIFFER_SPEED_CTRL_LEFT_TAU_DEFAULT   0.0f
+#define SNIFFER_SPEED_CTRL_RIGHT_KP_DEFAULT   0.0f
+#define SNIFFER_SPEED_CTRL_RIGHT_KI_DEFAULT   0.0f
+#define SNIFFER_SPEED_CTRL_RIGHT_KD_DEFAULT   0.0f
+#define SNIFFER_SPEED_CTRL_RIGHT_TAU_DEFAULT  0.0f
 
-class SpeedController {
+class SnifferSpeedCtrl {
   private:
   float _proportional_gain;
   float _integral_gain;
@@ -47,10 +47,10 @@ class SpeedController {
   float _control_min;
   float _control_max;
   float _target_value;
-  SamplingController _sampler;
+  SnifferSamplingCtrl _sampler;
 
   public:
-  SpeedController(float u_min, float u_max, unsigned long ts_millisec);
+  SnifferSpeedCtrl(float u_min, float u_max, unsigned long ts_millisec);
   void setProportionalGain(float kp);
   void setIntegralGain(float ki);
   void setDerivativeGain(float kd);
@@ -71,9 +71,9 @@ class SpeedController {
   float calcControl(float current_value);
 //////////////////////////////////////////////
 // Sniffer Robot
-  static SpeedController left_wheel;
-  static SpeedController right_wheel;
-  static void Initialize(Stream *p_debug);
+  static SnifferSpeedCtrl left_wheel;
+  static SnifferSpeedCtrl right_wheel;
+  static void begin(Stream *p_debug);
 //////////////////////////////////////////////
 };
 

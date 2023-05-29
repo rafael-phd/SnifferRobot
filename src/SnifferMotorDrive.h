@@ -16,24 +16,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
  
-#ifndef MOTOR_DRIVE_h
-#define MOTOR_DRIVE_h
+#ifndef SNIFFER_MOTOR_DRIVE_h
+#define SNIFFER_MOTOR_DRIVE_h
 
 #include <Arduino.h>
 
-#define MOTOR_DRIVE_enA 11
-#define MOTOR_DRIVE_enB 10
-#define MOTOR_DRIVE_in1 9
-#define MOTOR_DRIVE_in2 8
-#define MOTOR_DRIVE_in3 7
-#define MOTOR_DRIVE_in4 6
+#define SNIFFER_MOTOR_DRIVE_enA 11
+#define SNIFFER_MOTOR_DRIVE_enB 10
+#define SNIFFER_MOTOR_DRIVE_in1 9
+#define SNIFFER_MOTOR_DRIVE_in2 8
+#define SNIFFER_MOTOR_DRIVE_in3 7
+#define SNIFFER_MOTOR_DRIVE_in4 6
 
-#define MOTOR_DRIVE_CONTROL_MIN -255.0f
-#define MOTOR_DRIVE_CONTROL_MAX  255.0f
+#define SNIFFER_MOTOR_DRIVE_CONTROL_MIN -255.0f
+#define SNIFFER_MOTOR_DRIVE_CONTROL_MAX  255.0f
 
-#define MOTOR_CONTROL_IS_FWD(u, u_prev) (((u == 0) && (u_prev > 0)) || (u > 0))
+#define SNIFFER_MOTOR_DRIVE_CONTROL_IS_FWD(u, u_prev) (((u == 0) && (u_prev > 0)) || (u > 0))
 
-class MotorDrive {
+class SnifferMotorDrive {
   private:
   int _control_a;
   int _control_b;
@@ -43,7 +43,7 @@ class MotorDrive {
   bool _isForward(int control);
 
   public:
-  MotorDrive();
+  SnifferMotorDrive();
   float getControl_A();
   float getControl_B();
   bool getIsForward_A();
@@ -52,8 +52,8 @@ class MotorDrive {
   void setControl_B(float control);
 //////////////////////////////////////////////
 // Sniffer Robot
-  static MotorDrive motor_drive;
-  static void Initialize(Stream *p_debug);
+  static SnifferMotorDrive motor_drive;
+  static void begin(Stream *p_debug);
 //////////////////////////////////////////////
 };
 

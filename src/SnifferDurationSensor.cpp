@@ -16,30 +16,30 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "duration_sensor.h"
+#include "SnifferDurationSensor.h"
 
-DurationSensor DurationSensor::duration;
+SnifferDurationSensor SnifferDurationSensor::duration;
 
-void DurationSensor::Initialize(Stream *p_debug) {
-  DurationSensor::duration.Reset();
+void SnifferDurationSensor::begin(Stream *p_debug) {
+  SnifferDurationSensor::duration.Reset();
   
   if (p_debug != NULL) {
-    p_debug->println("Duration Initialized");
+    p_debug->println("Duration begind");
   }
 }
 
 
-void DurationSensor::Reset() {
+void SnifferDurationSensor::Reset() {
   _initial_time_millis = millis();
 }
 
 
-DurationSensor::DurationSensor() {
+SnifferDurationSensor::SnifferDurationSensor() {
   Reset();
 }
 
 
-float DurationSensor::getValue() {
+float SnifferDurationSensor::read() {
   unsigned long current_time_millis, elapsed_time_millis;
 
   current_time_millis = millis();

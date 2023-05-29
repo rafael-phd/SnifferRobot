@@ -16,29 +16,29 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "sampling_ctrl.h" 
+#include "SnifferSamplingCtrl.h" 
 
 
-SamplingController::SamplingController(unsigned long ts_millisec) {
+SnifferSamplingCtrl::SnifferSamplingCtrl(unsigned long ts_millisec) {
   _sampling_time_millisec = ts_millisec;
-  Initialize();
+  begin();
 }
 
 
-unsigned long SamplingController::getSamplingTimeInMillis() {
+unsigned long SnifferSamplingCtrl::getSamplingTimeInMillis() {
   return _sampling_time_millisec;
 }
 
-unsigned long SamplingController::getElapsedTimeInMillis() {
+unsigned long SnifferSamplingCtrl::getElapsedTimeInMillis() {
   return _elapsed_time_millisec;
 }
 
 
-float SamplingController::getElapsedTimeInSec() {
+float SnifferSamplingCtrl::getElapsedTimeInSec() {
   return ((float)getElapsedTimeInMillis()) / 1000.0f;
 }
 
-bool SamplingController::_isExpired() {
+bool SnifferSamplingCtrl::_isExpired() {
   _current_time_millisec = millis();
   
   if (_current_time_millisec >= _last_sampled_time_millisec) {
@@ -55,15 +55,15 @@ bool SamplingController::_isExpired() {
 }
 
 
-SamplingController::operator bool() const {
+SnifferSamplingCtrl::operator bool() const {
   return _isExpired();
 }
 
-void SamplingController::Reset() {
+void SnifferSamplingCtrl::Reset() {
   _last_sampled_time_millisec = _current_time_millisec;
 }
 
-void SamplingController::Initialize() {
+void SnifferSamplingCtrl::begin() {
   _current_time_millisec = millis();
   _last_sampled_time_millisec = _current_time_millisec;
   _elapsed_time_millisec = 0u;

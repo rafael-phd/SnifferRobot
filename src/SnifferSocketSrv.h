@@ -16,95 +16,95 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
  
-#ifndef SOCKET_SRV_h
-#define SOCKET_SRV_h
+#ifndef SNIFFER_SOCKET_SRV_h
+#define SNIFFER_SOCKET_SRV_h
 
 #include <Arduino.h>
 
 #include "WiFiEsp.h"
 #include "SoftwareSerial.h"
 
-#include "sampling_ctrl.h" /* SamplingController */
+#include "SnifferSamplingCtrl.h" /* SnifferSamplingCtrl */
 
 #define ESP8266_RX 5
 #define ESP8266_TX 4
 #define ESP8266_BAUDRATE 9600u
 
-#define SOCKET_SERVER_PORT 8080u
+#define SNIFFER_SOCKET_SRV_PORT 8080u
 #define WIFI_SSID "xfrshome"
 #define WIFI_PWD  "RaceHome@21$"
 
-#define SOCKET_SERVER_SAMPLING_TIME_MILLIS  1000u
-#define SOCKET_SERVER_CLIENT_TIMEOUT_MILLIS 5000u
+#define SNIFFER_SOCKET_SRV_SAMPLING_TIME_MILLIS  1000u
+#define SNIFFER_SOCKET_SRV_CLIENT_TIMEOUT_MILLIS 5000u
 
 /*
  * Data to send current measurements to the client
  */
-enum SrvData {
-  SRVDATA_DURATION_IDX,
-  SRVDATA_SPEED_LEFT_IDX,
-  SRVDATA_SPEED_RIGHT_IDX,
-  SRVDATA_IR_LEFT_IDX,
-  SRVDATA_IR_RIGHT_IDX,
-  SRVDATA_CONTROL_LEFT_IDX,
-  SRVDATA_CONTROL_RIGHT_IDX,
-  SRVDATA_LEN
+enum SnifferSrvData {
+  SNIFFER_SRVDATA_DURATION_IDX,
+  SNIFFER_SRVDATA_SPEED_LEFT_IDX,
+  SNIFFER_SRVDATA_SPEED_RIGHT_IDX,
+  SNIFFER_SRVDATA_IR_LEFT_IDX,
+  SNIFFER_SRVDATA_IR_RIGHT_IDX,
+  SNIFFER_SRVDATA_CONTROL_LEFT_IDX,
+  SNIFFER_SRVDATA_CONTROL_RIGHT_IDX,
+  SNIFFER_SRVDATA_LEN
 };
 
 
-enum CliCmd {
-  CLICMD_NONE,
-  CLICMD_CONN_END,
-  CLICMD_MOTOR_CTRL,
-  CLICMD_PID_LEFT,
-  CLICMD_PID_RIGHT,
-  CLICMD_SPEED_CTRL,
-  CLICMD_LEN
+enum SnifferCliCmd {
+  SNIFFER_CLICMD_NONE,
+  SNIFFER_CLICMD_CONN_END,
+  SNIFFER_CLICMD_MOTOR_CTRL,
+  SNIFFER_CLICMD_PID_LEFT,
+  SNIFFER_CLICMD_PID_RIGHT,
+  SNIFFER_CLICMD_SPEED_CTRL,
+  SNIFFER_CLICMD_LEN
 };
 
 /*
  * Data used to test motor drive controls
  */
-enum CliDataMotorCtrl {
-  CLIDATA_MOTOR_CTRL_LEFT_IDX,
-  CLIDATA_MOTOR_CTRL_RIGHT_IDX,
-  CLIDATA_MOTOR_CTRL_LEN
+enum SnifferCliDataMotorCtrl {
+  SNIFFER_CLIDATA_MOTOR_CTRL_LEFT_IDX,
+  SNIFFER_CLIDATA_MOTOR_CTRL_RIGHT_IDX,
+  SNIFFER_CLIDATA_MOTOR_CTRL_LEN
 };
 
 /*
  * Data used to optimize PID parameters.
  */
-enum CliDataPID {
-  CLIDATA_PID_KP_IDX,
-  CLIDATA_PID_KI_IDX,
-  CLIDATA_PID_KD_IDX,
-  CLIDATA_PID_TAU_IDX,
-  CLIDATA_PID_LEN
+enum SnifferCliDataPID {
+  SNIFFER_CLIDATA_PID_KP_IDX,
+  SNIFFER_CLIDATA_PID_KI_IDX,
+  SNIFFER_CLIDATA_PID_KD_IDX,
+  SNIFFER_CLIDATA_PID_TAU_IDX,
+  SNIFFER_CLIDATA_PID_LEN
 };
 
 /*
  * Data used to speed controller.
  */
-enum CliDataSpeedCtrl {
-  CLIDATA_SPEED_CTRL_TGT_LEFT_IDX,
-  CLIDATA_SPEED_CTRL_TGT_RIGHT_IDX,
-  CLIDATA_SPEED_CTRL_LEN
+enum SnifferCliDataSpeedCtrl {
+  SNIFFER_CLIDATA_SPEED_CTRL_TGT_LEFT_IDX,
+  SNIFFER_CLIDATA_SPEED_CTRL_TGT_RIGHT_IDX,
+  SNIFFER_CLIDATA_SPEED_CTRL_LEN
 };
 
 #define BYTES_PER_DATA      4u
-#define CLIDATA_LEN_MAX     4u
+#define SNIFFER_CLIDATA_LEN_MAX     4u
 
-class SocketSrv {
+class SnifferSocketSrv {
   private:      
     WiFiEspServer _server;   
     WiFiEspClient _client;   
     SoftwareSerial _esp;
-    float _srv_data[SRVDATA_LEN];
-    float _cli_data[CLIDATA_LEN_MAX];
-    CliCmd _cli_cmd;
+    float _srv_data[SNIFFER_SRVDATA_LEN];
+    float _cli_data[SNIFFER_CLIDATA_LEN_MAX];
+    SnifferCliCmd _cli_cmd;
     long _esp_baudrate;
-    SamplingController _sampler;
-    SamplingController _client_timeout;
+    SnifferSamplingCtrl _sampler;
+    SnifferSamplingCtrl _client_timeout;
 
     bool _Read(Stream *p_debug);
     bool _Write();
@@ -112,12 +112,12 @@ class SocketSrv {
         
 
   public:
-    SocketSrv(int esp_rx_pin, int esp_tx_pin, long esp_baudrate, unsigned int socket_port, unsigned long sampling_time, unsigned long client_timeout);
+    SnifferSocketSrv(int esp_rx_pin, int esp_tx_pin, long esp_baudrate, unsigned int socket_port, unsigned long sampling_time, unsigned long client_timeout);
     void setSrvData(unsigned int idx, float value);
     void setCliData(unsigned int idx, float value);
     float getSrvData(unsigned int idx);
     float getCliData(unsigned int idx);
-    CliCmd getCliCmd();
+    SnifferCliCmd getCliCmd();
     void beginEsp();
     void beginServer();
     bool hasClient();
@@ -125,8 +125,8 @@ class SocketSrv {
     bool Talk(Stream *p_debug);
 //////////////////////////////////////////////
 // Sniffer Robot
-    static SocketSrv socket;
-    static void Initialize(Stream *p_debug);
+    static SnifferSocketSrv socket;
+    static void begin(Stream *p_debug);
 //////////////////////////////////////////////    
 };
 

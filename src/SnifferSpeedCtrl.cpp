@@ -16,32 +16,32 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
- #include "speed_controller.h"
+ #include "SnifferSpeedCtrl.h"
 
 
-SpeedController SpeedController::left_wheel(/* u_min = */ MOTOR_DRIVE_CONTROL_MIN, 
-                                            /* u_max = */ MOTOR_DRIVE_CONTROL_MAX, 
-                                            /* ts_millisec = */ SPEED_CONTROL_SAMPLING_TIME_MILLISEC);
-SpeedController SpeedController::right_wheel(/* u_min = */ MOTOR_DRIVE_CONTROL_MIN, 
-                                             /* u_max = */ MOTOR_DRIVE_CONTROL_MAX, 
-                                             /* ts_millisec = */ SPEED_CONTROL_SAMPLING_TIME_MILLISEC);
+SnifferSpeedCtrl SnifferSpeedCtrl::left_wheel(/* u_min = */ SNIFFER_MOTOR_DRIVE_CONTROL_MIN, 
+                                            /* u_max = */ SNIFFER_MOTOR_DRIVE_CONTROL_MAX, 
+                                            /* ts_millisec = */ SNIFFER_SPEED_CTRL_SAMPLING_TIME_MILLISEC);
+SnifferSpeedCtrl SnifferSpeedCtrl::right_wheel(/* u_min = */ SNIFFER_MOTOR_DRIVE_CONTROL_MIN, 
+                                             /* u_max = */ SNIFFER_MOTOR_DRIVE_CONTROL_MAX, 
+                                             /* ts_millisec = */ SNIFFER_SPEED_CTRL_SAMPLING_TIME_MILLISEC);
 
 
-void SpeedController::Initialize(Stream *p_debug) {
-  SpeedController::left_wheel.setProportionalGain(SPEED_CONTROL_LEFT_KP_DEFAULT);
-  SpeedController::left_wheel.setIntegralGain(SPEED_CONTROL_LEFT_KI_DEFAULT);
-  SpeedController::left_wheel.setDerivativeGain(SPEED_CONTROL_LEFT_KD_DEFAULT);  
-  SpeedController::left_wheel.setDerivativeFilterGain(SPEED_CONTROL_LEFT_TAU_DEFAULT);
-  SpeedController::left_wheel.Reset();
-  SpeedController::right_wheel.setProportionalGain(SPEED_CONTROL_RIGHT_KP_DEFAULT);
-  SpeedController::right_wheel.setIntegralGain(SPEED_CONTROL_RIGHT_KI_DEFAULT);
-  SpeedController::right_wheel.setDerivativeGain(SPEED_CONTROL_RIGHT_KD_DEFAULT);  
-  SpeedController::right_wheel.setDerivativeFilterGain(SPEED_CONTROL_RIGHT_TAU_DEFAULT);
-  SpeedController::right_wheel.Reset();
+void SnifferSpeedCtrl::begin(Stream *p_debug) {
+  SnifferSpeedCtrl::left_wheel.setProportionalGain(SNIFFER_SPEED_CTRL_LEFT_KP_DEFAULT);
+  SnifferSpeedCtrl::left_wheel.setIntegralGain(SNIFFER_SPEED_CTRL_LEFT_KI_DEFAULT);
+  SnifferSpeedCtrl::left_wheel.setDerivativeGain(SNIFFER_SPEED_CTRL_LEFT_KD_DEFAULT);  
+  SnifferSpeedCtrl::left_wheel.setDerivativeFilterGain(SNIFFER_SPEED_CTRL_LEFT_TAU_DEFAULT);
+  SnifferSpeedCtrl::left_wheel.Reset();
+  SnifferSpeedCtrl::right_wheel.setProportionalGain(SNIFFER_SPEED_CTRL_RIGHT_KP_DEFAULT);
+  SnifferSpeedCtrl::right_wheel.setIntegralGain(SNIFFER_SPEED_CTRL_RIGHT_KI_DEFAULT);
+  SnifferSpeedCtrl::right_wheel.setDerivativeGain(SNIFFER_SPEED_CTRL_RIGHT_KD_DEFAULT);  
+  SnifferSpeedCtrl::right_wheel.setDerivativeFilterGain(SNIFFER_SPEED_CTRL_RIGHT_TAU_DEFAULT);
+  SnifferSpeedCtrl::right_wheel.Reset();
 }
 
 
-SpeedController::SpeedController(float u_min, float u_max, unsigned long ts_millisec) : _sampler(ts_millisec > 0 ? ts_millisec : 1000u) {
+SnifferSpeedCtrl::SnifferSpeedCtrl(float u_min, float u_max, unsigned long ts_millisec) : _sampler(ts_millisec > 0 ? ts_millisec : 1000u) {
   _proportional_gain = 0.0f;
   _integral_gain = 0.0f;
   _derivative_gain = 0.0f;
@@ -63,7 +63,7 @@ SpeedController::SpeedController(float u_min, float u_max, unsigned long ts_mill
 }
 
 
-void SpeedController::setProportionalGain(float kp) {  
+void SnifferSpeedCtrl::setProportionalGain(float kp) {  
   if (kp >= 0.0f) {
     // we assume a non-negative number
     _proportional_gain = kp;
@@ -71,7 +71,7 @@ void SpeedController::setProportionalGain(float kp) {
 }
 
 
-void SpeedController::setIntegralGain(float ki) {
+void SnifferSpeedCtrl::setIntegralGain(float ki) {
   if (ki >= 0.0f) {
     // we assume a non-negative number
     _integral_gain = ki;      
@@ -79,7 +79,7 @@ void SpeedController::setIntegralGain(float ki) {
 }
 
 
-void SpeedController::setDerivativeGain(float kd) {
+void SnifferSpeedCtrl::setDerivativeGain(float kd) {
   if (kd >= 0.0f) {
     // we assume a non-negative number
     _derivative_gain = kd;    
@@ -87,24 +87,24 @@ void SpeedController::setDerivativeGain(float kd) {
 }
 
 
-void SpeedController::setDerivativeFilterGain(float tau) {
+void SnifferSpeedCtrl::setDerivativeFilterGain(float tau) {
   if (tau >= 0.0f) {
     // we assume a non-negative number
     _derivative_filter_gain = tau;
   }  
 }
 
-void SpeedController::setTargetValue(float target_value) {
+void SnifferSpeedCtrl::setTargetValue(float target_value) {
   _target_value = target_value;  
 }
 
 
-void SpeedController::Reset() {
+void SnifferSpeedCtrl::Reset() {
   _previous_control = 0.0f;
   _previous_error = 0.0f;
   _previous_previous_error = 0.0f;
   _previous_filtered_derivative = 0.0f;
-  _sampler.Initialize();
+  _sampler.begin();
 }
   /*
    * Discrete-time PID Controller with Derivative Low-Pass Filter and Integral Anti-Windup.
@@ -117,7 +117,7 @@ void SpeedController::Reset() {
    * @param target_value target value of the observed state variable
    * @return current PID control, i.e., u[k]
    */  
-float SpeedController::calcControl(float current_value) {
+float SnifferSpeedCtrl::calcControl(float current_value) {
   float sampling_time, control, error, proportional, integral, derivative, filtered_derivative;
 
   if (_sampler) {

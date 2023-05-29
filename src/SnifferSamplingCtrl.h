@@ -16,26 +16,34 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
  
-#ifndef DURATION_SENSOR_h
-#define DURATION_SENSOR_h
+#ifndef SNIFFER_SAMPLING_CTRL_h
+#define SNIFFER_SAMPLING_CTRL_h
 
 #include <Arduino.h>
 #include <limits.h> /* ULONG_MAX */
 
-
-class DurationSensor {
+class SnifferSamplingCtrl {
   private:
-  unsigned long _initial_time_millis;
+  unsigned long _current_time_millisec;
+  unsigned long _elapsed_time_millisec;
+  unsigned long _last_sampled_time_millisec;
+  unsigned long _sampling_time_millisec;
+  bool _isExpired();
 
   public:
-  DurationSensor();
+  /*
+   * Basic Sampling Time Control 
+   * 
+   * Our central idea is to regulate the timing of asynchronous and sequential processes 
+   * by taking a sample at the first moment when the elapsed time exceeds the set sampling time. 
+   */
+  SnifferSamplingCtrl(unsigned long ts_millisec);  
+  explicit operator bool() const;  
+  unsigned long getSamplingTimeInMillis();
+  unsigned long getElapsedTimeInMillis();  
+  float getElapsedTimeInSec();  
   void Reset();
-  float getValue();
-//////////////////////////////////////////////
-// Sniffer Robot
-  static DurationSensor duration;
-  static void Initialize(Stream *p_debug);
-//////////////////////////////////////////////
+  void begin();
 };
 
 #endif

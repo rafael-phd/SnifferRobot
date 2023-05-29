@@ -17,40 +17,40 @@
  */
 
 
-#include "speed_sensor.h" 
+#include "SnifferSpeedSensor.h" 
 
 
-SpeedSensor SpeedSensor::left_wheel(SPEED_SENSOR_ELAPSED_TIME_MAX_MILLISEC);
-SpeedSensor SpeedSensor::right_wheel(SPEED_SENSOR_ELAPSED_TIME_MAX_MILLISEC);
+SnifferSpeedSensor SnifferSpeedSensor::left_wheel(SNIFFER_SPEED_SENSOR_ELAPSED_TIME_MAX_MILLISEC);
+SnifferSpeedSensor SnifferSpeedSensor::right_wheel(SNIFFER_SPEED_SENSOR_ELAPSED_TIME_MAX_MILLISEC);
 
 
-void SpeedSensor::Initialize(Stream *p_debug) {
-  pinMode(SPEED_SENSOR_RIGHT_out, INPUT);
-  pinMode(SPEED_SENSOR_LEFT_out, INPUT);
+void SnifferSpeedSensor::begin(Stream *p_debug) {
+  pinMode(SNIFFER_SPEED_SENSOR_RIGHT_out, INPUT);
+  pinMode(SNIFFER_SPEED_SENSOR_LEFT_out, INPUT);
 
-  attachInterrupt(digitalPinToInterrupt(SPEED_SENSOR_RIGHT_out), SpeedSensor::rightSensor_Event, RISING);
-  attachInterrupt(digitalPinToInterrupt(SPEED_SENSOR_LEFT_out), SpeedSensor::leftSensor_Event, RISING);
+  attachInterrupt(digitalPinToInterrupt(SNIFFER_SPEED_SENSOR_RIGHT_out), SnifferSpeedSensor::rightSensor_Event, RISING);
+  attachInterrupt(digitalPinToInterrupt(SNIFFER_SPEED_SENSOR_LEFT_out), SnifferSpeedSensor::leftSensor_Event, RISING);
   
   if (p_debug != NULL) {
-    p_debug->println("Speed Sensors Initialized");
+    p_debug->println("Speed Sensors begind");
   }
 }
 
 
-void SpeedSensor::rightSensor_Event() {
-  SpeedSensor::right_wheel.pulseEvent();  
+void SnifferSpeedSensor::rightSensor_Event() {
+  SnifferSpeedSensor::right_wheel.pulseEvent();  
 }
 
-void SpeedSensor::leftSensor_Event() {
-  SpeedSensor::left_wheel.pulseEvent();  
+void SnifferSpeedSensor::leftSensor_Event() {
+  SnifferSpeedSensor::left_wheel.pulseEvent();  
 }
 
-SpeedSensor::SpeedSensor(unsigned long elapsed_time_max) : _sampler(elapsed_time_max) {
+SnifferSpeedSensor::SnifferSpeedSensor(unsigned long elapsed_time_max) : _sampler(elapsed_time_max) {
   _speed_millimeters_per_secs = 0.0f;
 }
 
 
-float SpeedSensor::getValue(bool is_forward) {
+float SnifferSpeedSensor::read(bool is_forward) {
   if (_sampler) {
     _speed_millimeters_per_secs = 0.0f;
   } 
@@ -62,7 +62,7 @@ float SpeedSensor::getValue(bool is_forward) {
 }
   
 
-void SpeedSensor::pulseEvent() {
+void SnifferSpeedSensor::pulseEvent() {
   // Parameters
   const float wheel_perimeter_millimeter = 60.0f * PI;
   const float wheel_pulses_per_rot = 20.0f;

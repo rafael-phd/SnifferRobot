@@ -1,6 +1,6 @@
 /*
  * Author: Rafael Rodrigues da Silva
- * Date: May 2, 2023
+ * Date: May 13, 2023
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,33 +16,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
  
-#ifndef SPEED_SENSOR_h
-#define SPEED_SENSOR_h
+#ifndef SNIFFER_IR_SENSOR_h
+#define SNIFFER_IR_SENSOR_h
 
 #include <Arduino.h>
 
-#include "sampling_ctrl.h" /* SamplingController */
+#define SNIFFER_IR_LEFT_a0              A0 
+#define SNIFFER_IR_RIGHT_a0             A1 
 
-#define SPEED_SENSOR_RIGHT_out                  3
-#define SPEED_SENSOR_LEFT_out                   2
-#define SPEED_SENSOR_ELAPSED_TIME_MAX_MILLISEC  1000u
 
-class SpeedSensor {
+class SnifferIRSensor {
   private:
-  float _speed_millimeters_per_secs;
-  SamplingController _sampler;
+  int _pin;
 
   public:
-  SpeedSensor(unsigned long elapsed_time_max);
-  float getValue(bool is_forward);
-  void pulseEvent();
+  SnifferIRSensor(int pin);
+  float read();
 //////////////////////////////////////////////
 // Sniffer Robot
-  static SpeedSensor left_wheel;
-  static SpeedSensor right_wheel;
-  static void leftSensor_Event();
-  static void rightSensor_Event();
-  static void Initialize(Stream *p_debug);
+  static SnifferIRSensor front_left;
+  static SnifferIRSensor front_right;
+  static void begin(Stream *p_debug);
 //////////////////////////////////////////////
 };
 

@@ -16,16 +16,16 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "socket_srv.h" 
+#include "SnifferSocketSrv.h" 
 
-SocketSrv SocketSrv::socket(ESP8266_RX, ESP8266_TX, ESP8266_BAUDRATE, SOCKET_SERVER_PORT, SOCKET_SERVER_SAMPLING_TIME_MILLIS, SOCKET_SERVER_CLIENT_TIMEOUT_MILLIS);
+SnifferSocketSrv SnifferSocketSrv::socket(ESP8266_RX, ESP8266_TX, ESP8266_BAUDRATE, SNIFFER_SOCKET_SRV_PORT, SNIFFER_SOCKET_SRV_SAMPLING_TIME_MILLIS, SNIFFER_SOCKET_SRV_CLIENT_TIMEOUT_MILLIS);
 
 
-void SocketSrv::Initialize(Stream *p_debug) {
+void SnifferSocketSrv::begin(Stream *p_debug) {
   int status;     // the Wifi radio's status
   
   // initialize serial for ESP module
-  SocketSrv::socket.beginEsp();
+  SnifferSocketSrv::socket.beginEsp();
 
   // check for the presence of the shield
   if (WiFi.status() == WL_NO_SHIELD) {
@@ -60,17 +60,17 @@ void SocketSrv::Initialize(Stream *p_debug) {
   }
   
   // start the socket server
-  SocketSrv::socket.beginServer();
+  SnifferSocketSrv::socket.beginServer();
 }
 
-SocketSrv::SocketSrv(int esp_rx_pin, int esp_tx_pin, long esp_baudrate, unsigned int socket_port, unsigned long sampling_time, unsigned long client_timeout) : 
+SnifferSocketSrv::SnifferSocketSrv(int esp_rx_pin, int esp_tx_pin, long esp_baudrate, unsigned int socket_port, unsigned long sampling_time, unsigned long client_timeout) : 
             _esp(esp_rx_pin, esp_tx_pin), _server(socket_port), _client(255), _sampler(sampling_time), _client_timeout(client_timeout) {
   _esp_baudrate = esp_baudrate;
-  _cli_cmd = CLICMD_NONE;
+  _cli_cmd = SNIFFER_CLICMD_NONE;
 }
 
 
-void SocketSrv::beginEsp() {
+void SnifferSocketSrv::beginEsp() {
   _esp.begin(_esp_baudrate);
   
   // initialize ESP module
@@ -78,38 +78,38 @@ void SocketSrv::beginEsp() {
 }
 
 
-void SocketSrv::beginServer() {
+void SnifferSocketSrv::beginServer() {
   _server.begin();
 }
 
 
-void SocketSrv::setSrvData(unsigned int idx, float value) {
+void SnifferSocketSrv::setSrvData(unsigned int idx, float value) {
   _srv_data[idx] = value;  
 }
 
 
-void SocketSrv::setCliData(unsigned int idx, float value) {
+void SnifferSocketSrv::setCliData(unsigned int idx, float value) {
   _cli_data[idx] = value;
 }
 
 
-float SocketSrv::getSrvData(unsigned int idx) {
+float SnifferSocketSrv::getSrvData(unsigned int idx) {
   return _srv_data[idx];
 }
 
 
-float SocketSrv::getCliData(unsigned int idx) {
+float SnifferSocketSrv::getCliData(unsigned int idx) {
   return _cli_data[idx];
 }
 
 
-CliCmd SocketSrv::getCliCmd() {
+SnifferCliCmd SnifferSocketSrv::getCliCmd() {
   return _cli_cmd;
 }
 
 
-bool SocketSrv::_Read(Stream *p_debug) {   
-  size_t data_sz_max = BYTES_PER_DATA * CLIDATA_LEN_MAX;
+bool SnifferSocketSrv::_Read(Stream *p_debug) {   
+  size_t data_sz_max = BYTES_PER_DATA * SNIFFER_CLIDATA_LEN_MAX;
   unsigned char data[data_sz_max];
   size_t data_sz, data_sz_tgt;
   unsigned char header;
@@ -117,26 +117,26 @@ bool SocketSrv::_Read(Stream *p_debug) {
   int i;
 
   header = (unsigned char)_client.read();
-  if ((header < 0) || (header >= CLICMD_LEN)) {
+  if ((header < 0) || (header >= SNIFFER_CLICMD_LEN)) {
     if (p_debug != NULL) {
-      p_debug->print("SocketSrv::_Read: Invalid Command! command is ");
+      p_debug->print("SnifferSocketSrv::_Read: Invalid Command! command is ");
       p_debug->print(header);
       p_debug->print(" and should be between 0 and ");
-      p_debug->print(CLICMD_LEN);
+      p_debug->print(SNIFFER_CLICMD_LEN);
       p_debug->println(".");
     }
     return false;
   }
-  _cli_cmd = (CliCmd)header;
+  _cli_cmd = (SnifferCliCmd)header;
 
   
   switch(_cli_cmd) {
-    case CLICMD_MOTOR_CTRL:
-      data_sz_tgt = BYTES_PER_DATA * CLIDATA_MOTOR_CTRL_LEN;
+    case SNIFFER_CLICMD_MOTOR_CTRL:
+      data_sz_tgt = BYTES_PER_DATA * SNIFFER_CLIDATA_MOTOR_CTRL_LEN;
       data_sz = _client.read(data, data_sz_max);
       if (data_sz != data_sz_tgt) {
         if (p_debug != NULL) {
-          p_debug->print("SocketSrv::_Read: Invalid Data Lenth! length is ");
+          p_debug->print("SnifferSocketSrv::_Read: Invalid Data Lenth! length is ");
           p_debug->print(data_sz);
           p_debug->print(" and should be ");
           p_debug->print(data_sz_tgt);
@@ -145,17 +145,17 @@ bool SocketSrv::_Read(Stream *p_debug) {
         return false;
       }
       pf_data = reinterpret_cast<float *>(data);
-      for(i=0;i<CLIDATA_MOTOR_CTRL_LEN;i++) {
+      for(i=0;i<SNIFFER_CLIDATA_MOTOR_CTRL_LEN;i++) {
         setCliData(i, pf_data[i]);
       }
       break;
-    case CLICMD_PID_LEFT:
-    case CLICMD_PID_RIGHT:
-      data_sz_tgt = BYTES_PER_DATA * CLIDATA_PID_LEN;
+    case SNIFFER_CLICMD_PID_LEFT:
+    case SNIFFER_CLICMD_PID_RIGHT:
+      data_sz_tgt = BYTES_PER_DATA * SNIFFER_CLIDATA_PID_LEN;
       data_sz = _client.read(data, data_sz_max);
       if (data_sz != data_sz_tgt) {
         if (p_debug != NULL) {
-          p_debug->print("SocketSrv::_Read: Invalid Data Lenth! length is ");
+          p_debug->print("SnifferSocketSrv::_Read: Invalid Data Lenth! length is ");
           p_debug->print(data_sz);
           p_debug->print(" and should be ");
           p_debug->print(data_sz_tgt);
@@ -164,16 +164,16 @@ bool SocketSrv::_Read(Stream *p_debug) {
         return false;
       }
       pf_data = reinterpret_cast<float *>(data);
-      for(i=0;i<CLIDATA_PID_LEN;i++) {
+      for(i=0;i<SNIFFER_CLIDATA_PID_LEN;i++) {
         setCliData(i, pf_data[i]);
       }
       break;
-    case CLICMD_SPEED_CTRL:
-      data_sz_tgt = BYTES_PER_DATA * CLIDATA_SPEED_CTRL_LEN;
+    case SNIFFER_CLICMD_SPEED_CTRL:
+      data_sz_tgt = BYTES_PER_DATA * SNIFFER_CLIDATA_SPEED_CTRL_LEN;
       data_sz = _client.read(data, data_sz_max);
       if (data_sz != data_sz_tgt) {
         if (p_debug != NULL) {
-          p_debug->print("SocketSrv::_Read: Invalid Data Lenth! length is ");
+          p_debug->print("SnifferSocketSrv::_Read: Invalid Data Lenth! length is ");
           p_debug->print(data_sz);
           p_debug->print(" and should be ");
           p_debug->print(data_sz_tgt);
@@ -182,7 +182,7 @@ bool SocketSrv::_Read(Stream *p_debug) {
         return false;
       }
       pf_data = reinterpret_cast<float *>(data);
-      for(i=0;i<CLIDATA_SPEED_CTRL_LEN;i++) {
+      for(i=0;i<SNIFFER_CLIDATA_SPEED_CTRL_LEN;i++) {
         setCliData(i, pf_data[i]);
       }
       break;
@@ -193,8 +193,8 @@ bool SocketSrv::_Read(Stream *p_debug) {
 }
 
 
-bool SocketSrv::_Write() {
-  size_t msg_sz_tgt = SRVDATA_LEN * BYTES_PER_DATA; 
+bool SnifferSocketSrv::_Write() {
+  size_t msg_sz_tgt = SNIFFER_SRVDATA_LEN * BYTES_PER_DATA; 
   unsigned char msg[msg_sz_tgt], *pb_srv_data;
   size_t msg_sz;
   int i;
@@ -210,53 +210,53 @@ bool SocketSrv::_Write() {
 }
 
 
-void SocketSrv::_clientStop() {
+void SnifferSocketSrv::_clientStop() {
   _client.flush();
   _client.stop();
-  _cli_cmd = CLICMD_NONE;
+  _cli_cmd = SNIFFER_CLICMD_NONE;
 }
 
 
-bool SocketSrv::Listen() {
+bool SnifferSocketSrv::Listen() {
   if (_sampler) {
     if (!_client) {
-      _client = SocketSrv::_server.available();
+      _client = SnifferSocketSrv::_server.available();
       if (!_client) {
         return false;
       }
-      _client_timeout.Initialize();
+      _client_timeout.begin();
     }    
     return true;
   }
   return false;
 }
 
-bool SocketSrv::Talk(Stream *p_debug) {
+bool SnifferSocketSrv::Talk(Stream *p_debug) {
   if (!_client.available()) {
     if (_client_timeout) {
       if (p_debug != NULL) {
-        p_debug->println("SocketSrv: No data from Client Timeout!");
+        p_debug->println("SnifferSocketSrv: No data from Client Timeout!");
       }      
       _clientStop();      
     } else if (p_debug != NULL) {
-      p_debug->print("SocketSrv: No data from Client for ");
+      p_debug->print("SnifferSocketSrv: No data from Client for ");
       p_debug->print(_client_timeout.getElapsedTimeInMillis());
       p_debug->println(" msec.");
     }
     return false;
   } else {
-    _client_timeout.Initialize();
+    _client_timeout.begin();
   }
   if (!_Read(p_debug)) {
     if (p_debug != NULL) {
-      p_debug->println("SocketSrv: Read Failed!");
+      p_debug->println("SnifferSocketSrv: Read Failed!");
     }
     _clientStop();
     return false;
   }  
-  if (getCliCmd() == CLICMD_CONN_END) {
+  if (getCliCmd() == SNIFFER_CLICMD_CONN_END) {
     if (p_debug != NULL) {
-      p_debug->println("SocketSrv: Client ended connection.");
+      p_debug->println("SnifferSocketSrv: Client ended connection.");
     }
     _clientStop();
     return true;
@@ -264,7 +264,7 @@ bool SocketSrv::Talk(Stream *p_debug) {
   _client.flush();
   if (!_Write()) {
     if (p_debug != NULL) {
-      p_debug->println("SocketSrv: Write Failed!");
+      p_debug->println("SnifferSocketSrv: Write Failed!");
     }
     _clientStop();
     return false;
@@ -272,6 +272,6 @@ bool SocketSrv::Talk(Stream *p_debug) {
   return true;
 }
 
-bool SocketSrv::hasClient() {
+bool SnifferSocketSrv::hasClient() {
   return _client == true;  
 }

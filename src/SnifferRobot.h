@@ -16,9 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "socket_srv.h" 
-#include "duration_sensor.h" 
-#include "speed_sensor.h" 
-#include "ir_sensor.h" 
-#include "motor_drive.h" 
-#include "speed_controller.h" 
+#include "SnifferSocketSrv.h" 
+#include "SnifferDurationSensor.h" 
+#include "SnifferSpeedSensor" 
+#include "SnifferIRSensor.h" 
+#include "SnifferMotorDrive.h" 
+#include "SnifferSpeedCtrl.h" 
+

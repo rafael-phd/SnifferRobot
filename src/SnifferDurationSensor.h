@@ -1,6 +1,6 @@
 /*
  * Author: Rafael Rodrigues da Silva
- * Date: May 13, 2023
+ * Date: May 21, 2023
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,27 +16,25 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
  
-#ifndef IR_SENSOR_h
-#define IR_SENSOR_h
+#ifndef SNIFFER_DURATION_SENSOR_h
+#define SNIFFER_DURATION_SENSOR_h
 
 #include <Arduino.h>
-
-#define IR_LEFT_a0              A0 
-#define IR_RIGHT_a0             A1 
+#include <limits.h> /* ULONG_MAX */
 
 
-class IRSensor {
+class SnifferDurationSensor {
   private:
-  int _pin;
+  unsigned long _initial_time_millis;
 
   public:
-  IRSensor(int pin);
-  float getValue();
+  SnifferDurationSensor();
+  void Reset();
+  float read();
 //////////////////////////////////////////////
 // Sniffer Robot
-  static IRSensor front_left;
-  static IRSensor front_right;
-  static void Initialize(Stream *p_debug);
+  static SnifferDurationSensor duration;
+  static void begin(Stream *p_debug);
 //////////////////////////////////////////////
 };
 
